@@ -11,6 +11,9 @@ func main() {
 	mux.HandleFunc("/snippet/view", snippetViewHandler)
 	mux.HandleFunc("/snippet/create", snippetCreateHandler)
 
+	fileServer := http.FileServer(http.Dir("../../ui/static/"))
+	mux.Handle("/static/", http.StripPrefix("/static/", fileServer))
+
 	server := http.Server{
 		Addr:    ":8080",
 		Handler: mux,
