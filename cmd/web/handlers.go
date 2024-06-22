@@ -26,7 +26,7 @@ func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(r.URL.Query().Get("id"))
+	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
 		return
@@ -46,6 +46,10 @@ func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("create form"))
+}
+
+func (app *application) snippetCreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	title := "O snail"
 	content := "O snail\nClimb Mount Fuji,\nBut slowly, slowly!\n\n– Kobayashi Issa"
 	expires := 7
@@ -53,5 +57,5 @@ func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 	if err != nil {
 		app.serverError(w, err)
 	}
-	http.Redirect(w, r, fmt.Sprintf("/snippet/view?id=%d", id), http.StatusSeeOther)
+	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
