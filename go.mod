@@ -8,6 +8,7 @@ require (
 	github.com/go-playground/form v3.1.4+incompatible
 	github.com/go-sql-driver/mysql v1.8.1
 	github.com/justinas/alice v1.2.0
+	golang.org/x/crypto v0.24.0
 )
 
 require (
