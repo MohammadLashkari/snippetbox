@@ -59,6 +59,7 @@ func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 		Expires: 1,
 	}
 	app.render(w, http.StatusOK, "create.tmpl", data)
+
 }
 
 func (app *application) snippetCreatePostHandler(w http.ResponseWriter, r *http.Request) {
