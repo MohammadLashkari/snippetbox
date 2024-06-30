@@ -14,11 +14,17 @@ type Snippet struct {
 	Expires time.Time
 }
 
+type SnippetModelInterface interface {
+	Insert(title, content string, expires int) (int, error)
+	Get(id int) (*Snippet, error)
+	Latest() ([]*Snippet, error)
+}
+
 type SnippetModel struct {
 	DB *sql.DB
 }
 
-func (m *SnippetModel) Insert(title string, content string, expires int) (int, error) {
+func (m *SnippetModel) Insert(title, content string, expires int) (int, error) {
 	query := `INSERT INTO snippets (title, content, created, expires)
     VALUES(?, ?, UTC_TIMESTAMP(), DATE_ADD(UTC_TIMESTAMP(), INTERVAL ? DAY))`
 

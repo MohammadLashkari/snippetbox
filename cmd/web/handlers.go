@@ -10,6 +10,11 @@ import (
 	"github.com/MohammadLashkari/snippetbox/internal/validator"
 )
 
+// learning handlers test
+func ping(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("OK"))
+}
+
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		app.notFound(w)
@@ -64,7 +69,6 @@ func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 
 func (app *application) snippetCreatePostHandler(w http.ResponseWriter, r *http.Request) {
 	var form snippetCreateForm
-
 	if err := app.decodePostForm(r, &form); err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
@@ -74,7 +78,6 @@ func (app *application) snippetCreatePostHandler(w http.ResponseWriter, r *http.
 	form.CheckField(validator.MaxChars(form.Title, 100), "title", "this field cannot be more than 100 characters long")
 	form.CheckField(validator.NotBlank(form.Content), "content", "this field cannot be blank")
 	form.CheckField(validator.PermittedValue(form.Expires, 1, 7, 365), "expires", "this field must equal 1, 7 or 365")
-
 	if !form.Valid() {
 		data := app.newTemplateData(r)
 		data.Form = form
@@ -86,7 +89,6 @@ func (app *application) snippetCreatePostHandler(w http.ResponseWriter, r *http.
 	if err != nil {
 		app.serverError(w, err)
 	}
-
 	app.sessionManager.Put(r.Context(), "flash", "snippet successfully created!")
 	http.Redirect(w, r, fmt.Sprintf("/snippet/view/%d", id), http.StatusSeeOther)
 }
@@ -106,7 +108,6 @@ func (app *application) userSignup(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) userSignupPost(w http.ResponseWriter, r *http.Request) {
 	var form userSingupForm
-
 	if err := app.decodePostForm(r, &form); err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
@@ -154,7 +155,6 @@ func (app *application) userLogin(w http.ResponseWriter, r *http.Request) {
 
 func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 	var form userLoginForm
-
 	if err := app.decodePostForm(r, &form); err != nil {
 		app.clientError(w, http.StatusBadRequest)
 		return
@@ -182,7 +182,6 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
 	if err := app.sessionManager.RenewToken(r.Context()); err != nil {
 		app.serverError(w, err)
 		return
