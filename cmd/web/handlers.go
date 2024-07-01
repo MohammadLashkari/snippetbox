@@ -15,28 +15,6 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
-func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
-	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
-	user, err := app.users.Get(id)
-	if err != nil {
-		if errors.Is(err, models.ErrNoRecord) {
-			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
-
-		} else {
-			app.serverError(w, err)
-		}
-		return
-	}
-	data := app.newTemplateData(r)
-	data.User = user
-	app.render(w, http.StatusOK, "account.tmpl", data)
-}
-
-func (app *application) about(w http.ResponseWriter, r *http.Request) {
-	data := app.newTemplateData(r)
-	app.render(w, http.StatusOK, "about.tmpl", data)
-}
-
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		app.notFound(w)
@@ -209,6 +187,12 @@ func (app *application) userLoginPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	app.sessionManager.Put(r.Context(), "authenticatedUserID", id)
+	redirectPath := app.sessionManager.PopString(r.Context(), "redirectPathAfterLogin")
+	if redirectPath != "" {
+		http.Redirect(w, r, redirectPath, http.StatusSeeOther)
+		return
+
+	}
 	http.Redirect(w, r, "/snippet/create", http.StatusSeeOther)
 }
 
@@ -220,4 +204,26 @@ func (app *application) userLogoutPost(w http.ResponseWriter, r *http.Request) {
 	app.sessionManager.Remove(r.Context(), "authenticatedUserID")
 	app.sessionManager.Put(r.Context(), "flash", "you've been logged out successfully")
 	http.Redirect(w, r, "/", http.StatusSeeOther)
+}
+
+func (app *application) accountView(w http.ResponseWriter, r *http.Request) {
+	id := app.sessionManager.GetInt(r.Context(), "authenticatedUserID")
+	user, err := app.users.Get(id)
+	if err != nil {
+		if errors.Is(err, models.ErrNoRecord) {
+			http.Redirect(w, r, "/user/login", http.StatusSeeOther)
+
+		} else {
+			app.serverError(w, err)
+		}
+		return
+	}
+	data := app.newTemplateData(r)
+	data.User = user
+	app.render(w, http.StatusOK, "account.tmpl", data)
+}
+
+func (app *application) about(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	app.render(w, http.StatusOK, "about.tmpl", data)
 }
