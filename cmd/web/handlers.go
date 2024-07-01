@@ -15,6 +15,13 @@ func ping(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte("OK"))
 }
 
+func (app *application) about(w http.ResponseWriter, r *http.Request) {
+	data := app.newTemplateData(r)
+	app.serverError(w, fmt.Errorf("opps"))
+	return
+	app.render(w, http.StatusOK, "about.tmpl", data)
+}
+
 func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
 		app.notFound(w)
@@ -31,7 +38,7 @@ func (app *application) homeHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (app *application) snippetViewHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetView(w http.ResponseWriter, r *http.Request) {
 	id, err := strconv.Atoi(r.PathValue("id"))
 	if err != nil || id < 1 {
 		app.notFound(w)
@@ -58,7 +65,7 @@ type snippetCreateForm struct {
 	validator.Validator `form:"-"`
 }
 
-func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreate(w http.ResponseWriter, r *http.Request) {
 	data := app.newTemplateData(r)
 	data.Form = snippetCreateForm{
 		Expires: 1,
@@ -67,7 +74,7 @@ func (app *application) snippetCreateHandler(w http.ResponseWriter, r *http.Requ
 
 }
 
-func (app *application) snippetCreatePostHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) snippetCreatePost(w http.ResponseWriter, r *http.Request) {
 	var form snippetCreateForm
 	if err := app.decodePostForm(r, &form); err != nil {
 		app.clientError(w, http.StatusBadRequest)
