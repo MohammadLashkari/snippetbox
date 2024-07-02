@@ -1,4 +1,4 @@
-{{define "title"}}Account{{end}}
+{{define "title"}}Your Account{{end}}
 
 {{define "main"}}
 <h2>Your Account</h2>
@@ -15,6 +15,10 @@
     <tr>
         <th>Joined</th>
         <td>{{humanDate .Created}}</td>
+    </tr>
+    <tr>
+        <th>Password</th>
+        <td><a href="/account/password/update">Change password</a></td>
     </tr>
 </table>
 {{end}}

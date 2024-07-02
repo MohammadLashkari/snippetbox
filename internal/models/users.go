@@ -23,6 +23,7 @@ type UserModelInterface interface {
 	Authenticate(email, password string) (int, error)
 	Exists(id int) (bool, error)
 	Get(id int) (*User, error)
+	PasswordUpdate(id int, currentPassword, newPassword string) error
 }
 
 type UserModel struct {
@@ -36,7 +37,7 @@ func (m *UserModel) Insert(name, email, password string) error {
 	}
 	query := `INSERT INTO users(name, email, hashed_password, created)
     VALUES (?, ?, ?, UTC_TIMESTAMP())`
-	_, err = m.DB.Exec(query, name, email, hashedPassword)
+	_, err = m.DB.Exec(query, name, email, string(hashedPassword))
 	if err != nil {
 		var mysqlError *mysql.MySQLError
 		if errors.As(err, &mysqlError) {
@@ -90,4 +91,27 @@ func (m *UserModel) Get(id int) (*User, error) {
 		return nil, err
 	}
 	return &user, nil
+}
+
+func (m *UserModel) PasswordUpdate(id int, currentPassword, newPassword string) error {
+	query := `SELECT hashed_password FROM users WHERE id = ?`
+	var currentHashedPassword []byte
+	err := m.DB.QueryRow(query, id).Scan(&currentHashedPassword)
+	if err != nil {
+		return err
+	}
+	err = bcrypt.CompareHashAndPassword(currentHashedPassword, []byte(currentPassword))
+	if err != nil {
+		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
+			return ErrInvalidCredentials
+		}
+		return err
+	}
+	newHashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), 12)
+	if err != nil {
+		return err
+	}
+	query = `UPDATE users SET hashed_password = ? WHERE id = ?`
+	_, err = m.DB.Exec(query, string(newHashedPassword), id)
+	return err
 }
